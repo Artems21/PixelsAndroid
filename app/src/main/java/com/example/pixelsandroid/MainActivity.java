@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
 
-                int newWidth = 512;
-                int newHeight = 512;
+                int newWidth = 256;
+                int newHeight = 256;
 
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
 
