@@ -11,34 +11,63 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.slider.Slider;
 
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
 
+    private Slider effectSlider;
+    private Bitmap imageData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Permission check
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
 
-        findViewById(R.id.selectPhotoButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType("image/*");
-                startActivityForResult(intent, 1);
-            }
+        //Button event
+        findViewById(R.id.selectPhotoButton).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, 1);
+
         });
+
+        //Slider event
+        effectSlider = findViewById(R.id.effectSlider);
+        effectSlider.addOnChangeListener((slider, value, fromUser) -> drawNewImage(value));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (intent != null && requestCode == 1) {
+            changeImageSrc(intent);
+            drawNewImage(0.5f);
+            effectSlider.setValue(0.5f);
+        }
+    }
+
+    private void changeImageSrc(Intent intent) {
+        Uri imageSrc = intent.getData();
+        try {
+            imageData = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageSrc);
+        } catch (IOException e) {
+            throw new RuntimeException("Error when try get bitmap from image \n" + e);
+        }
     }
 
     int[][] bayerMatrix4x4 = {
@@ -48,54 +77,44 @@ public class MainActivity extends AppCompatActivity {
             {10, 6, 9, 5}
     };
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
-            Uri imageUri = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+    private void drawNewImage(float value) {
 
-                int newWidth = 256;
-                int newHeight = 256;
+        int newWidth = 256;
+        int newHeight = 256;
 
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(imageData, newWidth, newHeight, true);
 
-                int width = scaledBitmap.getWidth();
-                int height = scaledBitmap.getHeight();
+        int width = scaledBitmap.getWidth();
+        int height = scaledBitmap.getHeight();
 
-                for (int x = 0; x < width; x++) {
-                    for (int y = 0; y < height; y++) {
-                        int pixel = scaledBitmap.getPixel(x, y);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int pixel = scaledBitmap.getPixel(x, y);
 
-                        int r = (pixel >> 16) & 0xFF; // R
-                        int g = (pixel >> 8) & 0xFF;  // G
-                        int b = pixel & 0xFF;         // B
+                int r = (pixel >> 16) & 0xFF; // R
+                int g = (pixel >> 8) & 0xFF;  // G
+                int b = pixel & 0xFF;         // B
 
-                        double bright = (0.299 * r + 0.587 * g + 0.114 * b);
+                double bright = (0.299 * r + 0.587 * g + 0.114 * b);
 
-                        int bayer = bayerMatrix4x4[y % 4][x % 4];
+                int bayer = bayerMatrix4x4[y % 4][x % 4];
 
-                        int palIndex = (int) Math.floor(
-                                (bright * colors.length + (bayer - 8) * 16 * 2) / 256
-                        );
+                int palIndex = (int) Math.floor(
+                        (bright * colors.length + (bayer - 8) * 16 * 2 * value) / 256
+                );
 
-                        if (palIndex < 0) palIndex = 0;
-                        if (palIndex >= colors.length) palIndex = colors.length - 1;
+                if (palIndex < 0) palIndex = 0;
+                if (palIndex >= colors.length) palIndex = colors.length - 1;
 
-                        int finColor = colors[palIndex];
+                int finColor = colors[palIndex];
 
-                        scaledBitmap.setPixel(x, y, finColor);
-                    }
-                }
-
-                ImageView imageView = findViewById(R.id.imageView);
-                imageView.setImageBitmap(scaledBitmap);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                scaledBitmap.setPixel(x, y, finColor);
             }
         }
+
+        ImageView imageView = findViewById(R.id.imageView);
+        imageView.setImageBitmap(scaledBitmap);
+
     }
 
 

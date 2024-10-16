@@ -47,4 +47,19 @@
         app:layout_constraintVertical_bias="0.973"
         app:srcCompat="@drawable/camera_icon_circle_21" />
 
+    <com.google.android.material.slider.Slider
+        android:id="@+id/effectSlider"
+        android:layout_width="393dp"
+        android:layout_height="52dp"
+        android:stepSize="0.00625"
+        android:value="0.5"
+        android:valueFrom="0"
+        android:valueTo="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.776" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
