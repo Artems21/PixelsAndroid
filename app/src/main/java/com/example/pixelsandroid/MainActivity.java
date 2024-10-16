@@ -1,22 +1,27 @@
 package com.example.pixelsandroid;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.Spinner;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
+import com.example.pixelsandroid.effects.AbstractEffect;
+import com.example.pixelsandroid.effects.implementation.BayerMono4;
+import com.example.pixelsandroid.effects.implementation.PsychoEffect;
 import com.google.android.material.slider.Slider;
 
 import java.io.IOException;
@@ -27,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     private Slider effectSlider;
     private Bitmap imageData;
 
+    private AbstractEffect currentEffect;
+
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,9 +54,43 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        //Effect registration
+        AbstractEffect.registerEffects(
+                new AbstractEffect[]{
+                        new PsychoEffect(),
+                        new BayerMono4()
+                }
+        );
+
+
         //Slider event
         effectSlider = findViewById(R.id.effectSlider);
         effectSlider.addOnChangeListener((slider, value, fromUser) -> drawNewImage(value));
+
+        Spinner spinner = findViewById(R.id.themeSpinner);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.theme_array,
+                android.R.layout.simple_spinner_item
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentEffect = AbstractEffect.effects()[position];
+                effectSlider.setValue(0.5f);
+                drawNewImage(0.5f);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
     }
 
     @Override
@@ -70,51 +112,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    int[][] bayerMatrix4x4 = {
-            {0, 12, 3, 15},
-            {8, 4, 11, 7},
-            {2, 14, 1, 13},
-            {10, 6, 9, 5}
-    };
 
     private void drawNewImage(float value) {
+        if (imageData != null) {
+            AbstractAlgorithm algorithm = currentEffect.algorithm();
+            Bitmap scaledBitmap = algorithm.process(imageData, value);
 
-        int newWidth = 256;
-        int newHeight = 256;
-
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(imageData, newWidth, newHeight, true);
-
-        int width = scaledBitmap.getWidth();
-        int height = scaledBitmap.getHeight();
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int pixel = scaledBitmap.getPixel(x, y);
-
-                int r = (pixel >> 16) & 0xFF; // R
-                int g = (pixel >> 8) & 0xFF;  // G
-                int b = pixel & 0xFF;         // B
-
-                double bright = (0.299 * r + 0.587 * g + 0.114 * b);
-
-                int bayer = bayerMatrix4x4[y % 4][x % 4];
-
-                int palIndex = (int) Math.floor(
-                        (bright * colors.length + (bayer - 8) * 16 * 2 * value) / 256
-                );
-
-                if (palIndex < 0) palIndex = 0;
-                if (palIndex >= colors.length) palIndex = colors.length - 1;
-
-                int finColor = colors[palIndex];
-
-                scaledBitmap.setPixel(x, y, finColor);
-            }
+            ImageView imageView = findViewById(R.id.imageView);
+            imageView.setImageBitmap(scaledBitmap);
         }
-
-        ImageView imageView = findViewById(R.id.imageView);
-        imageView.setImageBitmap(scaledBitmap);
-
     }
 
 
