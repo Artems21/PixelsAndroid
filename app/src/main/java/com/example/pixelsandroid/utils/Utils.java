@@ -3,16 +3,19 @@ package com.example.pixelsandroid.utils;
 import android.graphics.Color;
 
 public class Utils {
-    public static int[] calculateNewDimensions(int originalWidth, int originalHeight, int maxSize) {
+    public static int[] calculateNewDimensions(int originalWidth, int originalHeight, int[] maxSize) {
         int newWidth = originalWidth;
         int newHeight = originalHeight;
 
-        if (originalWidth > maxSize || originalHeight > maxSize) {
+        int maxWidth = maxSize[0];
+        int maxHeight = maxSize[1];
+
+        if (originalWidth > maxWidth || originalHeight > maxHeight) {
             if (originalWidth > originalHeight) {
-                newWidth = maxSize;
+                newWidth = maxWidth;
                 newHeight = (newWidth * originalHeight) / originalWidth;
             } else {
-                newHeight = maxSize;
+                newHeight = maxHeight;
                 newWidth = (newHeight * originalWidth) / originalHeight;
             }
         }

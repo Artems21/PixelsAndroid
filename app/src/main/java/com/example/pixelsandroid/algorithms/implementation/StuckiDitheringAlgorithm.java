@@ -19,8 +19,8 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public Bitmap process(Bitmap imageData, float value) {
-        int[] size = calculateNewDimensions(imageData.getWidth(), imageData.getHeight(), 256);
+    public Bitmap process(Bitmap imageData, float value, int[] sizes) {
+        int[] size = calculateNewDimensions(imageData.getWidth(), imageData.getHeight(), sizes);
 
         int width = size[0];
         int height = size[1];
@@ -31,18 +31,12 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
         if (imageData.getHeight() != height || imageData.getWidth() != width)
             scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
 
-        value = (float) (value * 0.7);
+        value *= 0.7f;
 
-        List<Color> currentError = new ArrayList<>(width + 4);
-        List<Color> nextError = new ArrayList<>(width + 4);
-        List<Color> nextNextError = new ArrayList<>(width + 4);
 
-        // Initialize lists with black color
-        for (int i = 0; i < width + 4; i++) {
-            currentError.add(Color.valueOf(0, 0, 0));
-            nextError.add(Color.valueOf(0, 0, 0));
-            nextNextError.add(Color.valueOf(0, 0, 0));
-        }
+        int[][] currentError = new int[width + 4][3]; // [R, G, B]
+        int[][] nextError = new int[width + 4][3];
+        int[][] nextNextError = new int[width + 4][3];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -52,113 +46,78 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
                 int g = (pixel >> 8) & 0xFF;  // G
                 int b = pixel & 0xFF;         // B
 
-                Color color = Color.valueOf(
-                        clip((int) (r + Math.floor((currentError.get(x + 2).red() * value) / 42))),
-                        clip((int) (g + Math.floor((currentError.get(x + 2).green() * value) / 42))),
-                        clip((int) (b + Math.floor((currentError.get(x + 2).blue() * value) / 42)))
-                );
+                int adjustedR = clip((int) (r + Math.floor((currentError[x + 2][0] * value) / 42)));
+                int adjustedG = clip((int) (g + Math.floor((currentError[x + 2][1] * value) / 42)));
+                int adjustedB = clip((int) (b + Math.floor((currentError[x + 2][2] * value) / 42)));
 
-                int closestColor = findClosestColor(color, getPalette());
-
-                float closestR = (closestColor >> 16) & 0xFF; // R
-                float closestG = (closestColor >> 8) & 0xFF;  // G
-                float closestB = closestColor & 0xFF;         // B
-
+                int closestColor = findClosestColor(Color.valueOf(adjustedR, adjustedG, adjustedB), getPalette());
                 scaledBitmap.setPixel(x, y, closestColor);
 
-                // Calculate error
-                Color error = Color.valueOf(
-                        color.red() - closestR,
-                        color.green() - closestG,
-                        color.blue() - closestB
-                );
+                int errorR = adjustedR - ((closestColor >> 16) & 0xff);
+                int errorG = adjustedG - ((closestColor >> 8) & 0xff);
+                int errorB = adjustedB - (closestColor & 0xff);
 
-                currentError.set(x + 3, Color.valueOf(
-                        clamp(currentError.get(x + 3).red() + 8 * error.red()),
-                        clamp(currentError.get(x + 3).green() + 8 * error.green()),
-                        clamp(currentError.get(x + 3).blue() + 8 * error.blue())
-                )); // 1
+                currentError[x + 3][0] += 8 * errorR;
+                currentError[x + 3][1] += 8 * errorG;
+                currentError[x + 3][2] += 8 * errorB;
 
-                currentError.set(x + 4, Color.valueOf(
-                        clamp(currentError.get(x + 4).red() + 4 * error.red()),
-                        clamp(currentError.get(x + 4).green() + 4 * error.green()),
-                        clamp(currentError.get(x + 4).blue() + 4 * error.blue())
-                )); // 2
+                currentError[x + 4][0] += 4 * errorR;
+                currentError[x + 4][1] += 4 * errorG;
+                currentError[x + 4][2] += 4 * errorB;
 
-                // Update nextError
-                nextError.set(x, Color.valueOf(
-                        clamp(nextError.get(x).red() + 2 * error.red()),
-                        clamp(nextError.get(x).green() + 2 * error.green()),
-                        clamp(nextError.get(x).blue() + 2 * error.blue())
-                )); // 3
+                nextError[x + 0][0] += 2 * errorR;
+                nextError[x + 0][1] += 2 * errorG;
+                nextError[x + 0][2] += 2 * errorB;
 
-                nextError.set(x + 1, Color.valueOf(
-                        clamp(nextError.get(x + 1).red() + 4 * error.red()),
-                        clamp(nextError.get(x + 1).green() + 4 * error.green()),
-                        clamp(nextError.get(x + 1).blue() + 4 * error.blue())
-                )); // 4
+                nextError[x + 1][0] += 4 * errorR;
+                nextError[x + 1][1] += 4 * errorG;
+                nextError[x + 1][2] += 4 * errorB;
 
-                nextError.set(x + 2, Color.valueOf(
-                        clamp(nextError.get(x + 2).red() + 8 * error.red()),
-                        clamp(nextError.get(x + 2).green() + 8 * error.green()),
-                        clamp(nextError.get(x + 2).blue() + 8 * error.blue())
-                )); // 5
+                nextError[x + 2][0] += 8 * errorR;
+                nextError[x + 2][1] += 8 * errorG;
+                nextError[x + 2][2] += 8 * errorB;
 
-                nextError.set(x + 3, Color.valueOf(
-                        clamp(nextError.get(x + 3).red() + 4 * error.red()),
-                        clamp(nextError.get(x + 3).green() + 4 * error.green()),
-                        clamp(nextError.get(x + 3).blue() + 4 * error.blue())
-                )); // 6
+                nextError[x + 3][0] += 4 * errorR;
+                nextError[x + 3][1] += 4 * errorG;
+                nextError[x + 3][2] += 4 * errorB;
 
-                nextError.set(x + 4, Color.valueOf(
-                        clamp(nextError.get(x + 4).red() + 2 * error.red()),
-                        clamp(nextError.get(x + 4).green() + 2 * error.green()),
-                        clamp(nextError.get(x + 4).blue() + 2 * error.blue())
-                )); // 7
+                nextError[x + 4][0] += 2 * errorR;
+                nextError[x + 4][1] += 2 * errorG;
+                nextError[x + 4][2] += 2 * errorB;
 
-                // Update nextNextError
-                nextNextError.set(x, Color.valueOf(
-                        clamp(nextNextError.get(x).red() + 1 * error.red()),
-                        clamp(nextNextError.get(x).green() + 1 * error.green()),
-                        clamp(nextNextError.get(x).blue() + 1 * error.blue())
-                )); // 8
+                nextNextError[x + 0][0] += 1 * errorR;
+                nextNextError[x + 0][1] += 1 * errorG;
+                nextNextError[x + 0][2] += 1 * errorB;
 
-                nextNextError.set(x + 1, Color.valueOf(
-                        clamp(nextNextError.get(x + 1).red() + 2 * error.red()),
-                        clamp(nextNextError.get(x + 1).green() + 2 * error.green()),
-                        clamp(nextNextError.get(x + 1).blue() + 2 * error.blue())
-                )); // 9
+                nextNextError[x + 1][0] += 2 * errorR;
+                nextNextError[x + 1][1] += 2 * errorG;
+                nextNextError[x + 1][2] += 2 * errorB;
 
-                nextNextError.set(x + 2, Color.valueOf(
-                        clamp(nextNextError.get(x + 2).red() + 4 * error.red()),
-                        clamp(nextNextError.get(x + 2).green() + 4 * error.green()),
-                        clamp(nextNextError.get(x + 2).blue() + 4 * error.blue())
-                )); // 10
+                nextNextError[x + 2][0] += 4 * errorR;
+                nextNextError[x + 2][1] += 4 * errorG;
+                nextNextError[x + 2][2] += 4 * errorB;
 
-                nextNextError.set(x + 3, Color.valueOf(
-                        clamp(nextNextError.get(x + 3).red() + 2 * error.red()),
-                        clamp(nextNextError.get(x + 3).green() + 2 * error.green()),
-                        clamp(nextNextError.get(x + 3).blue() + 2 * error.blue())
-                )); // 11
+                nextNextError[x + 3][0] += 2 * errorR;
+                nextNextError[x + 3][1] += 2 * errorG;
+                nextNextError[x + 3][2] += 2 * errorB;
 
-                nextNextError.set(x + 4, Color.valueOf(
-                        clamp(nextNextError.get(x + 4).red() + 1 * error.red()),
-                        clamp(nextNextError.get(x + 4).green() + 1 * error.green()),
-                        clamp(nextNextError.get(x + 4).blue() + 1 * error.blue())
-                )); // 12
+                nextNextError[x + 4][0] += 1 * errorR;
+                nextNextError[x + 4][1] += 1 * errorG;
+                nextNextError[x + 4][2] += 1 * errorB;
             }
 
-            // Shift errors
-            for (int i = 0; i < currentError.size(); i++) {
-                currentError.set(i, nextError.get(i));
-                nextError.set(i, nextNextError.get(i));
-                nextNextError.set(i, Color.valueOf(0, 0, 0));
+            // Сдвиг ошибок
+            for (int i = 0; i < currentError.length; i++) {
+                currentError[i] = nextError[i];
+                nextError[i] = nextNextError[i];
+                nextNextError[i] = new int[]{0, 0, 0};
             }
         }
+
         return scaledBitmap;
     }
 
-    private float clamp(float value) {
+    private int clip(int value) {
         return Math.max(0, Math.min(255, value));
     }
 

@@ -14,6 +14,6 @@ public abstract class AbstractAlgorithm {
         return palette;
     }
 
-    public abstract Bitmap process(Bitmap imageData, float value);
+    public abstract Bitmap process(Bitmap imageData, float value, int[] sizes);
 
 }

@@ -15,6 +15,7 @@
         android:layout_height="344dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
@@ -87,7 +88,7 @@
         app:layout_constraintVertical_bias="0.776" />
 
     <Spinner
-        android:id="@+id/themeSpinner"
+        android:id="@+id/effectSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/selectPhotoButton"
@@ -96,5 +97,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.654" />
+
+    <Spinner
+        android:id="@+id/sizeSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:tooltipText="Max Sizes"
+        app:layout_constraintBottom_toBottomOf="@+id/selectPhotoButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.568" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

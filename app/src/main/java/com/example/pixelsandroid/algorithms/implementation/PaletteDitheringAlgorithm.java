@@ -18,8 +18,8 @@ public class PaletteDitheringAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public Bitmap process(Bitmap imageData, float value) {
-        int[] size = calculateNewDimensions(imageData.getWidth(), imageData.getHeight(), 256);
+    public Bitmap process(Bitmap imageData, float value, int[] sizes) {
+        int[] size = calculateNewDimensions(imageData.getWidth(), imageData.getHeight(), sizes);
 
         int width = size[0];
         int height = size[1];

@@ -88,6 +88,7 @@ import com.google.android.material.slider.Slider;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -95,6 +96,20 @@ public class MainActivity extends AppCompatActivity {
     private Slider effectSlider;
     private Bitmap imageData;
     private AbstractEffect currentEffect;
+
+    private final int[][] sizesArr = new int[][]{
+            {128, 128},
+            {160, 160},
+            {200, 200},
+            {220, 220},
+            {256, 256},
+            {320, 256},
+            {320, 220},
+            {320, 200}
+
+    };
+
+    private int[] currentSize = new int[]{128, 128};
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -192,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
         effectSlider = findViewById(R.id.effectSlider);
         effectSlider.addOnChangeListener((slider, value, fromUser) -> drawNewImage(value));
 
-        Spinner spinner = findViewById(R.id.themeSpinner);
+        Spinner effectSpinner = findViewById(R.id.effectSpinner);
 
         String[] effectsNames = Arrays.stream(AbstractEffect.effects())
                 .map(AbstractEffect::name)
@@ -205,8 +220,8 @@ public class MainActivity extends AppCompatActivity {
         );
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        effectSpinner.setAdapter(adapter);
+        effectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currentEffect = AbstractEffect.effects()[position];
@@ -219,10 +234,46 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Spinner sizeSpinner = findViewById(R.id.sizeSpinner);
+
+        String[] sizes = {"128x128",
+                "160x160",
+                "200x200",
+                "220x220",
+                "256x256",
+                "320x256",
+                "320x220",
+                "320x200"
+        };
+
+
+
+        ArrayAdapter<CharSequence> adapter2 = new ArrayAdapter<CharSequence>(
+                this,
+                android.R.layout.simple_spinner_item,
+                sizes
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sizeSpinner.setAdapter(adapter2);
+        sizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentSize = sizesArr[position];
+                drawNewImage(effectSlider.getValue());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
         //Event for random button
         findViewById(R.id.random_effect_button).setOnClickListener(v -> {
             //Spinner listener call effect changer
-            spinner.setSelection((int)(Math.random() * AbstractEffect.effects().length));
+            effectSpinner.setSelection((int) (Math.random() * AbstractEffect.effects().length));
             effectSlider.setValue((((int) (Math.random() * 144)) * 0.00625f) + 0.1f);
         });
 
@@ -251,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
     private void drawNewImage(float value) {
         if (imageData != null) {
             AbstractAlgorithm algorithm = currentEffect.algorithm();
-            Bitmap scaledBitmap = algorithm.process(imageData, value);
+            Bitmap scaledBitmap = algorithm.process(imageData, value, currentSize);
 
             ImageView imageView = findViewById(R.id.imageView);
             imageView.setImageBitmap(scaledBitmap);
