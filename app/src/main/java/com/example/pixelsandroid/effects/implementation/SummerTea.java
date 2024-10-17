@@ -4,20 +4,23 @@ import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
 import com.example.pixelsandroid.algorithms.implementation.BayerPowerAlgorithm;
 import com.example.pixelsandroid.effects.AbstractEffect;
 
-public class BayerMono4 extends AbstractEffect {
-
+public class SummerTea extends AbstractEffect {
     @Override
     public String name() {
-        return "Bayer Mono 4";
+        return "Summer Tea";
     }
 
     @Override
     public int[] palette() {
         return new int[]{
-                0xFF000000,
-                0xFF676767,
-                0xFFb6b6b6,
-                0xFFFFFFFF
+                0xFF0d2b45,
+                0xFF203c56,
+                0xFF544e68,
+                0xFF8d697a,
+                0xFFd08159,
+                0xFFffaa5e,
+                0xFFffd4a3,
+                0xFFffecd6
         };
     }
 

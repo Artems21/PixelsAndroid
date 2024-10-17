@@ -4,20 +4,24 @@ import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
 import com.example.pixelsandroid.algorithms.implementation.BayerPowerAlgorithm;
 import com.example.pixelsandroid.effects.AbstractEffect;
 
-public class BayerMono4 extends AbstractEffect {
-
+public class LiquidChrome extends AbstractEffect {
     @Override
     public String name() {
-        return "Bayer Mono 4";
+        return "Liquid Chrome";
     }
 
     @Override
     public int[] palette() {
         return new int[]{
-                0xFF000000,
-                0xFF676767,
-                0xFFb6b6b6,
-                0xFFFFFFFF
+                0xFF08141e,
+                0xFF0f2a3f,
+                0xFF20394f,
+                0xFF4e495f,
+                0xFF997577,
+                0xFFf6d6bd,
+                0xFFc3a38a,
+                0xFF816271,
+                0xFF4e495f
         };
     }
 

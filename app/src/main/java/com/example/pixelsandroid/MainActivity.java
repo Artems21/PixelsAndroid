@@ -20,18 +20,80 @@ import androidx.core.content.ContextCompat;
 
 import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
 import com.example.pixelsandroid.effects.AbstractEffect;
+import com.example.pixelsandroid.effects.implementation.AniView;
+import com.example.pixelsandroid.effects.implementation.ArtisticDance;
+import com.example.pixelsandroid.effects.implementation.BK0010;
+import com.example.pixelsandroid.effects.implementation.BayerMono;
 import com.example.pixelsandroid.effects.implementation.BayerMono4;
-import com.example.pixelsandroid.effects.implementation.PsychoEffect;
+import com.example.pixelsandroid.effects.implementation.Cherry;
+import com.example.pixelsandroid.effects.implementation.CherryView;
+import com.example.pixelsandroid.effects.implementation.ClassicC64;
+import com.example.pixelsandroid.effects.implementation.ClassicCGA;
+import com.example.pixelsandroid.effects.implementation.ClassicPCII;
+import com.example.pixelsandroid.effects.implementation.ControlCherry;
+import com.example.pixelsandroid.effects.implementation.Coral4;
+import com.example.pixelsandroid.effects.implementation.CosmoVors;
+import com.example.pixelsandroid.effects.implementation.CrazySanta;
+import com.example.pixelsandroid.effects.implementation.CuberSummer;
+import com.example.pixelsandroid.effects.implementation.DaytimeSleep;
+import com.example.pixelsandroid.effects.implementation.DitherNorm;
+import com.example.pixelsandroid.effects.implementation.DreamStar;
+import com.example.pixelsandroid.effects.implementation.DualBase;
+import com.example.pixelsandroid.effects.implementation.DustyPlace;
+import com.example.pixelsandroid.effects.implementation.Elephant;
+import com.example.pixelsandroid.effects.implementation.EveningForest;
+import com.example.pixelsandroid.effects.implementation.Final14;
+import com.example.pixelsandroid.effects.implementation.FrozenPhoto;
+import com.example.pixelsandroid.effects.implementation.FruitFive;
+import com.example.pixelsandroid.effects.implementation.GreenTree;
+import com.example.pixelsandroid.effects.implementation.Half32;
+import com.example.pixelsandroid.effects.implementation.HotChocolate;
+import com.example.pixelsandroid.effects.implementation.Impulse;
+import com.example.pixelsandroid.effects.implementation.Just16;
+import com.example.pixelsandroid.effects.implementation.LimeNight;
+import com.example.pixelsandroid.effects.implementation.LiquidChrome;
+import com.example.pixelsandroid.effects.implementation.LoFiPixels;
+import com.example.pixelsandroid.effects.implementation.Lotty;
+import com.example.pixelsandroid.effects.implementation.MDR2;
+import com.example.pixelsandroid.effects.implementation.MagentaDither;
+import com.example.pixelsandroid.effects.implementation.MagentaOdd;
+import com.example.pixelsandroid.effects.implementation.Moda12;
+import com.example.pixelsandroid.effects.implementation.MonoDither;
+import com.example.pixelsandroid.effects.implementation.MonoStucki;
+import com.example.pixelsandroid.effects.implementation.OilStucki;
+import com.example.pixelsandroid.effects.implementation.OldSunset;
+import com.example.pixelsandroid.effects.implementation.PastelHi;
+import com.example.pixelsandroid.effects.implementation.PastelView;
+import com.example.pixelsandroid.effects.implementation.PhotoPaper;
+import com.example.pixelsandroid.effects.implementation.Pico8;
+import com.example.pixelsandroid.effects.implementation.PocketConsole;
+import com.example.pixelsandroid.effects.implementation.Psycho;
+import com.example.pixelsandroid.effects.implementation.Rock16;
+import com.example.pixelsandroid.effects.implementation.SimpleCase;
+import com.example.pixelsandroid.effects.implementation.Slom;
+import com.example.pixelsandroid.effects.implementation.SmallTown;
+import com.example.pixelsandroid.effects.implementation.SuggarWorld;
+import com.example.pixelsandroid.effects.implementation.SummerTea;
+import com.example.pixelsandroid.effects.implementation.T800;
+import com.example.pixelsandroid.effects.implementation.T800Dither;
+import com.example.pixelsandroid.effects.implementation.T800Flex;
+import com.example.pixelsandroid.effects.implementation.Ton60;
+import com.example.pixelsandroid.effects.implementation.UndergroundWorms;
+import com.example.pixelsandroid.effects.implementation.Vic20;
+import com.example.pixelsandroid.effects.implementation.WarmLight;
+import com.example.pixelsandroid.effects.implementation.Win16Classic;
+import com.example.pixelsandroid.effects.implementation.XRGBDithering;
+import com.example.pixelsandroid.effects.implementation.YellowNight;
 import com.google.android.material.slider.Slider;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
 
     private Slider effectSlider;
     private Bitmap imageData;
-
     private AbstractEffect currentEffect;
 
     @SuppressLint("MissingInflatedId")
@@ -54,11 +116,74 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+
         //Effect registration
         AbstractEffect.registerEffects(
                 new AbstractEffect[]{
-                        new PsychoEffect(),
-                        new BayerMono4()
+                        new PastelView(),
+                        new BayerMono4(),
+                        new CosmoVors(),
+                        new AniView(),
+                        new PocketConsole(),
+                        new T800Flex(),
+                        new HotChocolate(),
+                        new FrozenPhoto(),
+                        new ClassicPCII(),
+                        new MagentaOdd(),
+                        new LiquidChrome(),
+                        new Ton60(),
+                        new OldSunset(),
+                        new BK0010(),
+                        new YellowNight(),
+                        new XRGBDithering(),
+                        new GreenTree(),
+                        new DitherNorm(),
+                        new MonoStucki(),
+                        new FruitFive(),
+                        new Pico8(),
+                        new Coral4(),
+                        new ArtisticDance(),
+                        new ClassicC64(),
+                        new Elephant(),
+                        new EveningForest(),
+                        new OilStucki(),
+                        new UndergroundWorms(),
+                        new PhotoPaper(),
+                        new Half32(),
+                        new Lotty(),
+                        new DualBase(),
+                        new Moda12(),
+                        new T800(),
+                        new MagentaDither(),
+                        new CuberSummer(),
+                        new Impulse(),
+                        new Vic20(),
+                        new MonoDither(),
+                        new DreamStar(),
+                        new Slom(),
+                        new Win16Classic(),
+                        new Cherry(),
+                        new LimeNight(),
+                        new DaytimeSleep(),
+                        new ControlCherry(),
+                        new SuggarWorld(),
+                        new CherryView(),
+                        new LoFiPixels(),
+                        new Final14(),
+                        new SummerTea(),
+                        new SimpleCase(),
+                        new BayerMono(),
+                        new ClassicCGA(),
+                        new CrazySanta(),
+                        new T800Dither(),
+                        new SmallTown(),
+                        new Rock16(),
+                        new WarmLight(),
+                        new DustyPlace(),
+                        new MDR2(),
+                        new PastelHi(),
+                        new Just16(),
+                        new Psycho()
                 }
         );
 
@@ -69,10 +194,14 @@ public class MainActivity extends AppCompatActivity {
 
         Spinner spinner = findViewById(R.id.themeSpinner);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+        String[] effectsNames = Arrays.stream(AbstractEffect.effects())
+                .map(AbstractEffect::name)
+                .toArray(String[]::new);
+
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
                 this,
-                R.array.theme_array,
-                android.R.layout.simple_spinner_item
+                android.R.layout.simple_spinner_item,
+                effectsNames
         );
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -81,14 +210,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currentEffect = AbstractEffect.effects()[position];
-                effectSlider.setValue(0.5f);
-                drawNewImage(0.5f);
+                drawNewImage(effectSlider.getValue());
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
+        });
+
+        //Event for random button
+        findViewById(R.id.random_effect_button).setOnClickListener(v -> {
+            //Spinner listener call effect changer
+            spinner.setSelection((int)(Math.random() * AbstractEffect.effects().length));
+            effectSlider.setValue((((int) (Math.random() * 144)) * 0.00625f) + 0.1f);
         });
 
     }
@@ -123,47 +258,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    static final int[] colors = {
-            0xFF10101d,
-            0xFF49868b,
-            0xFF3eca6b,
-            0xFF98eb77,
-            0xFF7bb1eb,
-            0xFF566ed0,
-            0xFF443c7e,
-            0xFFaa5ec3,
-            0xFFfc83c7,
-            0xFFd95959,
-            0xFF883a56,
-            0xFFec955b,
-            0xFFffdd84,
-            0xFFffffff
-    };
-
-    public static int findClosestColor(int targetColor) {
-        int closestColor = colors[0];
-        double minDistance = Double.MAX_VALUE;
-
-        for (int color : colors) {
-            double distance = calculateDistance(targetColor, color);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestColor = color;
-            }
-        }
-        return closestColor;
-    }
-
-    private static double calculateDistance(int color1, int color2) {
-        int r1 = (color1 >> 16) & 0xFF;
-        int g1 = (color1 >> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
-
-        int r2 = (color2 >> 16) & 0xFF;
-        int g2 = (color2 >> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
-
-        return Math.sqrt(Math.pow(r2 - r1, 2) + Math.pow(g2 - g1, 2) + Math.pow(b2 - b1, 2));
-    }
 }

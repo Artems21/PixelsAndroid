@@ -1,12 +1,14 @@
 package com.example.pixelsandroid.algorithms.implementation;
 
+import static com.example.pixelsandroid.utils.Utils.calculateNewDimensions;
+
 import android.graphics.Bitmap;
 
 import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
 
-public class BayerAlgorithm extends AbstractAlgorithm {
+public class BayerPowerAlgorithm extends AbstractAlgorithm {
 
-    public BayerAlgorithm(int[] palette) {
+    public BayerPowerAlgorithm(int[] palette) {
         super(palette);
     }
 
@@ -16,16 +18,19 @@ public class BayerAlgorithm extends AbstractAlgorithm {
             {2, 14, 1, 13},
             {10, 6, 9, 5}
     };
-
     @Override
     public Bitmap process(Bitmap imageData, float value) {
-        int newWidth = 256;
-        int newHeight = 256;
 
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(imageData, newWidth, newHeight, true);
+        int[] size = calculateNewDimensions(imageData.getWidth(), imageData.getHeight(), 256);
 
-        int width = scaledBitmap.getWidth();
-        int height = scaledBitmap.getHeight();
+        int width = size[0];
+        int height = size[1];
+
+        Bitmap scaledBitmap = imageData;
+
+        //Scaled image if that need
+        if (imageData.getHeight() != height && imageData.getWidth() != width)
+             scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -48,7 +53,6 @@ public class BayerAlgorithm extends AbstractAlgorithm {
                 if (palIndex >= super.getPalette().length) palIndex = palette.length - 1;
 
                 int finColor = palette[palIndex];
-
                 scaledBitmap.setPixel(x, y, finColor);
             }
         }

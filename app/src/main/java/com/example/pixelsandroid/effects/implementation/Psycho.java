@@ -1,10 +1,10 @@
 package com.example.pixelsandroid.effects.implementation;
 
 import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
-import com.example.pixelsandroid.algorithms.implementation.BayerAlgorithm;
+import com.example.pixelsandroid.algorithms.implementation.BayerPowerAlgorithm;
 import com.example.pixelsandroid.effects.AbstractEffect;
 
-public class PsychoEffect extends AbstractEffect {
+public class Psycho extends AbstractEffect {
 
     @Override
     public String name() {
@@ -18,7 +18,7 @@ public class PsychoEffect extends AbstractEffect {
 
     @Override
     public AbstractAlgorithm algorithm() {
-        return new BayerAlgorithm(palette);
+        return new BayerPowerAlgorithm(palette);
     }
 
      final int[] palette = {

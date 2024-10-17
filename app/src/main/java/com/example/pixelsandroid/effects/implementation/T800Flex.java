@@ -1,28 +1,26 @@
 package com.example.pixelsandroid.effects.implementation;
 
 import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
-import com.example.pixelsandroid.algorithms.implementation.BayerPowerAlgorithm;
+import com.example.pixelsandroid.algorithms.implementation.StuckiDitheringAlgorithm;
 import com.example.pixelsandroid.effects.AbstractEffect;
 
-public class BayerMono4 extends AbstractEffect {
-
+public class T800Flex extends AbstractEffect {
     @Override
     public String name() {
-        return "Bayer Mono 4";
+        return "T800 Flex";
     }
 
     @Override
     public int[] palette() {
         return new int[]{
                 0xFF000000,
-                0xFF676767,
-                0xFFb6b6b6,
-                0xFFFFFFFF
+                0xFFFFFFFF,
+                0xFFFF0000
         };
     }
 
     @Override
     public AbstractAlgorithm algorithm() {
-        return new BayerPowerAlgorithm(palette());
+        return new StuckiDitheringAlgorithm(palette());
     }
 }
