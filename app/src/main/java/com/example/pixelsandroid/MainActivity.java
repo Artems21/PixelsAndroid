@@ -1,6 +1,7 @@
 package com.example.pixelsandroid;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -87,6 +89,7 @@ import com.example.pixelsandroid.effects.implementation.YellowNight;
 import com.google.android.material.slider.Slider;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -96,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
     private Slider effectSlider;
     private Bitmap imageData;
     private AbstractEffect currentEffect;
+    private ImageView imageView;
+    private Bitmap currentBitmap = null;
 
     private final int[][] sizesArr = new int[][]{
             {128, 128},
@@ -109,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
-    private int[] currentSize = new int[]{128, 128};
+    private int[] currentSize = new int[]{256, 256};
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -130,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, 1);
 
         });
+
+        //Init image view
+        imageView = findViewById(R.id.imageView);
 
 
         //Effect registration
@@ -236,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
         Spinner sizeSpinner = findViewById(R.id.sizeSpinner);
 
-        String[] sizes = {"128x128",
+        String[] textSizes = {"128x128",
                 "160x160",
                 "200x200",
                 "220x220",
@@ -247,15 +255,15 @@ public class MainActivity extends AppCompatActivity {
         };
 
 
-
         ArrayAdapter<CharSequence> adapter2 = new ArrayAdapter<CharSequence>(
                 this,
                 android.R.layout.simple_spinner_item,
-                sizes
+                textSizes
         );
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sizeSpinner.setAdapter(adapter2);
+        sizeSpinner.setSelection(4);
         sizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -275,6 +283,20 @@ public class MainActivity extends AppCompatActivity {
             //Spinner listener call effect changer
             effectSpinner.setSelection((int) (Math.random() * AbstractEffect.effects().length));
             effectSlider.setValue((((int) (Math.random() * 144)) * 0.00625f) + 0.1f);
+        });
+
+
+        //Event for save button
+        findViewById(R.id.save_button).setOnClickListener(v -> {
+            if (currentBitmap != null) {
+                String name = "CustomPhoto_" + currentEffect.name() + System.currentTimeMillis();
+                int resultCode = saveImageToGallery(currentBitmap, name);
+
+                new AlertDialog.Builder(this)
+                        .setTitle("Result")
+                        .setMessage(resultCode == 0 ? "Successfully saved to gallery" : "Error, something went wrong")
+                        .show();
+            }
         });
 
     }
@@ -303,10 +325,30 @@ public class MainActivity extends AppCompatActivity {
         if (imageData != null) {
             AbstractAlgorithm algorithm = currentEffect.algorithm();
             Bitmap scaledBitmap = algorithm.process(imageData, value, currentSize);
-
-            ImageView imageView = findViewById(R.id.imageView);
             imageView.setImageBitmap(scaledBitmap);
+            currentBitmap = scaledBitmap;
         }
+    }
+
+    private int saveImageToGallery(Bitmap bitmap, String name) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, name + ".jpg");
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/PixelsAndroid");
+
+        try {
+            Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri != null) {
+                OutputStream outputStream = getContentResolver().openOutputStream(uri);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.flush();
+                outputStream.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 1;
+        }
+        return 0;
     }
 
 }
