@@ -5,10 +5,16 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -91,7 +97,6 @@ import com.google.android.material.slider.Slider;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -102,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     private Bitmap currentBitmap = null;
 
-    private final int[][] sizesArr = new int[][]{
+    private final int[][] resolutionArr = new int[][]{
             {128, 128},
             {160, 160},
             {200, 200},
@@ -114,13 +119,19 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
-    private int[] currentSize = new int[]{256, 256};
+    private int[] currentResolution = new int[]{256, 256};
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.setStatusBarColor(Color.BLACK); // Укажи свой цвет
+        }
+
 
         //Permission check
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -129,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //Button event
-        findViewById(R.id.selectPhotoButton).setOnClickListener(v -> {
+        findViewById(R.id.select_photo_button).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.setType("image/*");
             startActivityForResult(intent, 1);
@@ -137,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Init image view
-        imageView = findViewById(R.id.imageView);
+        imageView = findViewById(R.id.image_view);
 
 
         //Effect registration
@@ -212,10 +223,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Slider event
-        effectSlider = findViewById(R.id.effectSlider);
+        effectSlider = findViewById(R.id.value_slider);
         effectSlider.addOnChangeListener((slider, value, fromUser) -> drawNewImage(value));
 
-        Spinner effectSpinner = findViewById(R.id.effectSpinner);
+        Spinner effectSpinner = findViewById(R.id.effects_spinner);
 
         String[] effectsNames = Arrays.stream(AbstractEffect.effects())
                 .map(AbstractEffect::name)
@@ -234,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 currentEffect = AbstractEffect.effects()[position];
                 drawNewImage(effectSlider.getValue());
+                setBackground(currentEffect.palette());
             }
 
             @Override
@@ -242,9 +254,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Spinner sizeSpinner = findViewById(R.id.sizeSpinner);
+        Spinner resolutionSpinner = findViewById(R.id.resolution_spinner);
 
-        String[] textSizes = {"128x128",
+        String[] textSizes = {
+                "128x128",
                 "160x160",
                 "200x200",
                 "220x220",
@@ -259,15 +272,22 @@ public class MainActivity extends AppCompatActivity {
                 this,
                 android.R.layout.simple_spinner_item,
                 textSizes
-        );
+        ){
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                view.setPadding(16, 16, 16, 16);
+                return view;
+            }
+        };
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        sizeSpinner.setAdapter(adapter2);
-        sizeSpinner.setSelection(4);
-        sizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        resolutionSpinner.setAdapter(adapter2);
+        resolutionSpinner.setSelection(4);
+        resolutionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                currentSize = sizesArr[position];
+                currentResolution = resolutionArr[position];
                 drawNewImage(effectSlider.getValue());
             }
 
@@ -299,6 +319,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Event for next resolution button
+        findViewById(R.id.next_res_button).setOnClickListener(v -> {
+            int maxPosition = resolutionArr.length - 1;
+            int currentPosition = resolutionSpinner.getSelectedItemPosition();
+            resolutionSpinner.setSelection((currentPosition != maxPosition) ? (currentPosition + 1) : 0);
+        });
+        //Event for back resolution button
+        findViewById(R.id.back_res_button).setOnClickListener(v -> {
+            int maxPosition = resolutionArr.length - 1;
+            int currentPosition = resolutionSpinner.getSelectedItemPosition();
+            resolutionSpinner.setSelection((currentPosition != 0) ? (currentPosition - 1) : maxPosition);
+        });
+        //Event for next effect button
+        findViewById(R.id.next_effect_button).setOnClickListener(v -> {
+            int maxPosition = AbstractEffect.effects().length - 1;
+            int currentPosition = effectSpinner.getSelectedItemPosition();
+            effectSpinner.setSelection((currentPosition != maxPosition) ? (currentPosition + 1) : 0);
+        });
+        //Event for back effect button
+        findViewById(R.id.back_effect_button).setOnClickListener(v -> {
+            int maxPosition = AbstractEffect.effects().length - 1;
+            int currentPosition = effectSpinner.getSelectedItemPosition();
+            effectSpinner.setSelection((currentPosition != 0) ? (currentPosition - 1) : maxPosition);
+        });
+
     }
 
     @Override
@@ -324,7 +369,7 @@ public class MainActivity extends AppCompatActivity {
     private void drawNewImage(float value) {
         if (imageData != null) {
             AbstractAlgorithm algorithm = currentEffect.algorithm();
-            Bitmap scaledBitmap = algorithm.process(imageData, value, currentSize);
+            Bitmap scaledBitmap = algorithm.process(imageData, value, currentResolution);
             imageView.setImageBitmap(scaledBitmap);
             currentBitmap = scaledBitmap;
         }
@@ -351,4 +396,17 @@ public class MainActivity extends AppCompatActivity {
         return 0;
     }
 
+
+
+    private void setBackground(int[] colors) {
+        if (getSupportActionBar() != null) {
+
+            GradientDrawable gradientDrawable = new GradientDrawable(
+                    GradientDrawable.Orientation.BL_TR,
+                    colors
+            );
+
+            getSupportActionBar().setBackgroundDrawable(gradientDrawable);
+        }
+    }
 }

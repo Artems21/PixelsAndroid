@@ -24,11 +24,9 @@ public class PaletteDitheringAlgorithm extends AbstractAlgorithm {
         int width = size[0];
         int height = size[1];
 
-        Bitmap scaledBitmap = imageData;
+        Bitmap scaledBitmap =  Bitmap.createScaledBitmap(imageData, width, height, true);
+        Bitmap newBitmap = scaledBitmap.copy(scaledBitmap.getConfig(), true);
 
-        //Scaled image if that need
-        if (imageData.getHeight() != height && imageData.getWidth() != width)
-            scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
 
         List<Color> currentError = new ArrayList<>();
         List<Color> nextError = new ArrayList<>();
@@ -60,7 +58,7 @@ public class PaletteDitheringAlgorithm extends AbstractAlgorithm {
                 float closestG = (closestColor >> 8) & 0xFF;  // G
                 float closestB = closestColor & 0xFF;         // B
 
-                scaledBitmap.setPixel(x, y, closestColor);
+                newBitmap.setPixel(x, y, closestColor);
 
                 // Calculate error
                 Color error = Color.valueOf(
@@ -101,6 +99,6 @@ public class PaletteDitheringAlgorithm extends AbstractAlgorithm {
             }
 
         }
-        return scaledBitmap;
+        return newBitmap;
     }
 }

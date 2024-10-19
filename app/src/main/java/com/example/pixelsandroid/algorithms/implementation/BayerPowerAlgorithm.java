@@ -26,11 +26,9 @@ public class BayerPowerAlgorithm extends AbstractAlgorithm {
         int width = size[0];
         int height = size[1];
 
-        Bitmap scaledBitmap = imageData;
+        Bitmap scaledBitmap =  Bitmap.createScaledBitmap(imageData, width, height, true);
+        Bitmap newBitmap = scaledBitmap.copy(scaledBitmap.getConfig(), true);
 
-        //Scaled image if that need
-        if (imageData.getHeight() != height && imageData.getWidth() != width)
-             scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -53,10 +51,10 @@ public class BayerPowerAlgorithm extends AbstractAlgorithm {
                 if (palIndex >= super.getPalette().length) palIndex = palette.length - 1;
 
                 int finColor = palette[palIndex];
-                scaledBitmap.setPixel(x, y, finColor);
+                newBitmap.setPixel(x, y, finColor);
             }
         }
-        return scaledBitmap;
+        return newBitmap;
     }
 
 }

@@ -25,11 +25,8 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
         int width = size[0];
         int height = size[1];
 
-        Bitmap scaledBitmap = imageData;
-
-        // Scaled image if needed
-        if (imageData.getHeight() != height || imageData.getWidth() != width)
-            scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
+        Bitmap newBitmap = scaledBitmap.copy(scaledBitmap.getConfig(), true);
 
         value *= 0.7f;
 
@@ -51,7 +48,7 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
                 int adjustedB = clip((int) (b + Math.floor((currentError[x + 2][2] * value) / 42)));
 
                 int closestColor = findClosestColor(Color.valueOf(adjustedR, adjustedG, adjustedB), getPalette());
-                scaledBitmap.setPixel(x, y, closestColor);
+                newBitmap.setPixel(x, y, closestColor);
 
                 int errorR = adjustedR - ((closestColor >> 16) & 0xff);
                 int errorG = adjustedG - ((closestColor >> 8) & 0xff);
@@ -114,7 +111,7 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
             }
         }
 
-        return scaledBitmap;
+        return newBitmap;
     }
 
     private int clip(int value) {

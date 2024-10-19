@@ -32,11 +32,9 @@ public class BayerDitheringAlgorithm extends AbstractAlgorithm {
         int width = size[0];
         int height = size[1];
 
-        Bitmap scaledBitmap = imageData;
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
 
-        //Scaled image if that need
-        if (imageData.getHeight() != height && imageData.getWidth() != width)
-            scaledBitmap = Bitmap.createScaledBitmap(imageData, width, height, true);
+        Bitmap newBitmap = scaledBitmap.copy(scaledBitmap.getConfig(), true);
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -58,11 +56,10 @@ public class BayerDitheringAlgorithm extends AbstractAlgorithm {
                         this.levels.blue() > 1 ? clip((int) (levelB * (255 / (this.levels.blue() - 1)))) : b);
 
                 int newColor = findClosestColor(fakeColor, getPalette());
-                scaledBitmap.setPixel(x, y, newColor);
+                newBitmap.setPixel(x, y, newColor);
             }
         }
-        return scaledBitmap;
+        return newBitmap;
     }
-
 
 }
