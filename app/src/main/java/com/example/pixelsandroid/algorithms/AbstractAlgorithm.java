@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 
 public abstract class AbstractAlgorithm {
 
-    private final int[] palette;
+    private int[] palette;
 
     public AbstractAlgorithm(int[] palette) {
         this.palette = palette;
@@ -15,5 +15,8 @@ public abstract class AbstractAlgorithm {
     }
 
     public abstract Bitmap process(Bitmap imageData, float value, int[] sizes);
+    public void updatePalette(int[] palette) {
+        this.palette = palette;
+    }
 
 }

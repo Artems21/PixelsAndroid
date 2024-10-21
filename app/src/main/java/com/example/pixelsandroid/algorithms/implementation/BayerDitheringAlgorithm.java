@@ -18,7 +18,7 @@ public class BayerDitheringAlgorithm extends AbstractAlgorithm {
             {10, 6, 9, 5}
     };
 
-    private Color levels;
+    private final Color levels;
 
     public BayerDitheringAlgorithm(int[] palette, Color levels) {
         super(palette);
@@ -50,12 +50,13 @@ public class BayerDitheringAlgorithm extends AbstractAlgorithm {
                 int levelG = (int) Math.floor((g * (this.levels.green() + 1) + (bayer - 8) * 16 * value) / 256);
                 int levelB = (int) Math.floor((b * (this.levels.blue() + 1) + (bayer - 8) * 16 * value) / 256);
 
-                Color fakeColor = Color.valueOf(
-                        this.levels.red() > 1 ? clip((int) (levelR * (255 / (this.levels.red() - 1)))) : r,
-                        this.levels.green() > 1 ? clip((int) (levelG * (255 / (this.levels.green() - 1)))) : g,
-                        this.levels.blue() > 1 ? clip((int) (levelB * (255 / (this.levels.blue() - 1)))) : b);
 
-                int newColor = findClosestColor(fakeColor, getPalette());
+                int r2 = this.levels.red() > 1 ? clip((int) (levelR * (255 / (this.levels.red() - 1)))) : r;
+                int g2 = this.levels.green() > 1 ? clip((int) (levelG * (255 / (this.levels.green() - 1)))) : g;
+                int b2 = this.levels.blue() > 1 ? clip((int) (levelB * (255 / (this.levels.blue() - 1)))) : b;
+
+
+                int newColor = findClosestColor(r2, g2, b2, getPalette());
                 newBitmap.setPixel(x, y, newColor);
             }
         }

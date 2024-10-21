@@ -25,7 +25,6 @@ public class EveningForest extends AbstractEffect {
                 0xFFb3122d,
                 0xFFcc2929,
                 0xFFe6653a,
-                //0xFFffbb5c,
                 0xFF330066,
                 0xFF1a0099,
                 0xFF1433cc,

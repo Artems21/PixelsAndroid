@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -20,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +27,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.pixelsandroid.algorithms.AbstractAlgorithm;
 import com.example.pixelsandroid.effects.AbstractEffect;
+import com.example.pixelsandroid.effects.EmptyEffect;
 import com.example.pixelsandroid.effects.implementation.AniView;
 import com.example.pixelsandroid.effects.implementation.ArtisticDance;
 import com.example.pixelsandroid.effects.implementation.BK0010;
@@ -53,6 +53,7 @@ import com.example.pixelsandroid.effects.implementation.EveningForest;
 import com.example.pixelsandroid.effects.implementation.Final14;
 import com.example.pixelsandroid.effects.implementation.FrozenPhoto;
 import com.example.pixelsandroid.effects.implementation.FruitFive;
+import com.example.pixelsandroid.effects.implementation.FunOrange;
 import com.example.pixelsandroid.effects.implementation.GreenTree;
 import com.example.pixelsandroid.effects.implementation.Half32;
 import com.example.pixelsandroid.effects.implementation.HotChocolate;
@@ -93,9 +94,16 @@ import com.example.pixelsandroid.effects.implementation.Win16Classic;
 import com.example.pixelsandroid.effects.implementation.XRGBDithering;
 import com.example.pixelsandroid.effects.implementation.YellowNight;
 import com.google.android.material.slider.Slider;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
@@ -106,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
     private AbstractEffect currentEffect;
     private ImageView imageView;
     private Bitmap currentBitmap = null;
+
+    public static final String CUSTOM_EFFECTS_NAME = "CustomEffects.json";
 
     private final int[][] resolutionArr = new int[][]{
             {128, 128},
@@ -127,19 +137,37 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.setStatusBarColor(Color.BLACK); // Укажи свой цвет
-        }
-
-
         //Permission check
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
 
-        //Button event
+        Window window = getWindow();
+        window.setStatusBarColor(Color.BLACK);
+
+        File file = new File(getFilesDir(), "CustomEffects.json");
+        try {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //Swipe button event
+        findViewById(R.id.goto_main_button).setOnClickListener(v -> {
+            Intent intent = new Intent(this, EffectCreatorActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+
+
+        });
+
+        //Init image view
+        imageView = findViewById(R.id.creator_image_view);
+
+        //Photo button event
         findViewById(R.id.select_photo_button).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.setType("image/*");
@@ -147,78 +175,107 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        //Init image view
-        imageView = findViewById(R.id.image_view);
+        Gson gson = new Gson();
+        ArrayList<EmptyEffect> effectsList = new ArrayList<>();
+        Type listType = new TypeToken<ArrayList<EmptyEffect>>() {
+        }.getType();
+
+        try {
+
+            FileReader reader = new FileReader(file);
+
+            effectsList = gson.fromJson(reader, listType);
+
+            if (effectsList == null) {
+                effectsList = new ArrayList<>();
+                System.out.println("null");
+            }
+
+            reader.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        AbstractEffect[] customEffects = effectsList.toArray(new EmptyEffect[0]);
+
+        AbstractEffect[] basedEffects = new AbstractEffect[]{
+                new AniView(),
+                new ArtisticDance(),
+                new BayerMono(),
+                new BayerMono4(),
+                new BK0010(),
+                new CuberSummer(),
+                new Cherry(),
+                new CherryView(),
+                new ControlCherry(),
+                new CosmoVors(),
+                new Coral4(),
+                new CrazySanta(),
+                new ClassicC64(),
+                new ClassicCGA(),
+                new ClassicPCII(),
+                new DaytimeSleep(),
+                new DitherNorm(),
+                new DreamStar(),
+                new DualBase(),
+                new DustyPlace(),
+                new Elephant(),
+                new EveningForest(),
+                new Final14(),
+                new FruitFive(),
+                new FunOrange(),
+                new FrozenPhoto(),
+                new GreenTree(),
+                new Half32(),
+                new HotChocolate(),
+                new Impulse(),
+                new Just16(),
+                new LiquidChrome(),
+                new LimeNight(),
+                new LoFiPixels(),
+                new Lotty(),
+                new MagentaDither(),
+                new MagentaOdd(),
+                new MDR2(),
+                new Moda12(),
+                new MonoDither(),
+                new MonoStucki(),
+                new OilStucki(),
+                new OldSunset(),
+                new PastelHi(),
+                new PastelView(),
+                new Pico8(),
+                new PhotoPaper(),
+                new Psycho(),
+                new PocketConsole(),
+                new Rock16(),
+                new Slom(),
+                new SimpleCase(),
+                new SmallTown(),
+                new SummerTea(),
+                new SuggarWorld(),
+                new T800(),
+                new T800Dither(),
+                new T800Flex(),
+                new Ton60(),
+                new UndergroundWorms(),
+                new Vic20(),
+                new WarmLight(),
+                new Win16Classic(),
+                new XRGBDithering(),
+                new YellowNight()
+        };
+
+        AbstractEffect[] combinedArray = new AbstractEffect[basedEffects.length + customEffects.length];
+        System.arraycopy(basedEffects, 0, combinedArray, 0, basedEffects.length);
+        System.arraycopy(customEffects, 0, combinedArray, basedEffects.length, customEffects.length);
+
 
 
         //Effect registration
         AbstractEffect.registerEffects(
-                new AbstractEffect[]{
-                        new PastelView(),
-                        new BayerMono4(),
-                        new CosmoVors(),
-                        new AniView(),
-                        new PocketConsole(),
-                        new T800Flex(),
-                        new HotChocolate(),
-                        new FrozenPhoto(),
-                        new ClassicPCII(),
-                        new MagentaOdd(),
-                        new LiquidChrome(),
-                        new Ton60(),
-                        new OldSunset(),
-                        new BK0010(),
-                        new YellowNight(),
-                        new XRGBDithering(),
-                        new GreenTree(),
-                        new DitherNorm(),
-                        new MonoStucki(),
-                        new FruitFive(),
-                        new Pico8(),
-                        new Coral4(),
-                        new ArtisticDance(),
-                        new ClassicC64(),
-                        new Elephant(),
-                        new EveningForest(),
-                        new OilStucki(),
-                        new UndergroundWorms(),
-                        new PhotoPaper(),
-                        new Half32(),
-                        new Lotty(),
-                        new DualBase(),
-                        new Moda12(),
-                        new T800(),
-                        new MagentaDither(),
-                        new CuberSummer(),
-                        new Impulse(),
-                        new Vic20(),
-                        new MonoDither(),
-                        new DreamStar(),
-                        new Slom(),
-                        new Win16Classic(),
-                        new Cherry(),
-                        new LimeNight(),
-                        new DaytimeSleep(),
-                        new ControlCherry(),
-                        new SuggarWorld(),
-                        new CherryView(),
-                        new LoFiPixels(),
-                        new Final14(),
-                        new SummerTea(),
-                        new SimpleCase(),
-                        new BayerMono(),
-                        new ClassicCGA(),
-                        new CrazySanta(),
-                        new T800Dither(),
-                        new SmallTown(),
-                        new Rock16(),
-                        new WarmLight(),
-                        new DustyPlace(),
-                        new MDR2(),
-                        new PastelHi(),
-                        new Just16(),
-                        new Psycho()
-                }
+                combinedArray
         );
 
 
@@ -272,16 +329,16 @@ public class MainActivity extends AppCompatActivity {
                 this,
                 android.R.layout.simple_spinner_item,
                 textSizes
-        ){
+        ) {
             @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 view.setPadding(16, 16, 16, 16);
                 return view;
             }
         };
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         resolutionSpinner.setAdapter(adapter2);
         resolutionSpinner.setSelection(4);
         resolutionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -302,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.random_effect_button).setOnClickListener(v -> {
             //Spinner listener call effect changer
             effectSpinner.setSelection((int) (Math.random() * AbstractEffect.effects().length));
-            effectSlider.setValue((((int) (Math.random() * 144)) * 0.00625f) + 0.1f);
+            effectSlider.setValue((((int) (Math.random() * 144)) * 0.0025f) + 0.1f);
         });
 
 
@@ -353,8 +410,10 @@ public class MainActivity extends AppCompatActivity {
             changeImageSrc(intent);
             drawNewImage(0.5f);
             effectSlider.setValue(0.5f);
+
         }
     }
+
 
     private void changeImageSrc(Intent intent) {
         Uri imageSrc = intent.getData();
@@ -397,15 +456,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private void setBackground(int[] colors) {
         if (getSupportActionBar() != null) {
-
             GradientDrawable gradientDrawable = new GradientDrawable(
                     GradientDrawable.Orientation.BL_TR,
                     colors
             );
-
             getSupportActionBar().setBackgroundDrawable(gradientDrawable);
         }
     }
