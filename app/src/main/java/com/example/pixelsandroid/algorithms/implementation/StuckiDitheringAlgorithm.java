@@ -47,7 +47,7 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
                 int adjustedG = clip((int) (g + Math.floor((currentError[x + 2][1] * value) / 42)));
                 int adjustedB = clip((int) (b + Math.floor((currentError[x + 2][2] * value) / 42)));
 
-                int closestColor = findClosestColor(Color.valueOf(adjustedR, adjustedG, adjustedB), getPalette());
+                int closestColor = findClosestColor(adjustedR, adjustedG, adjustedB, getPalette());
                 newBitmap.setPixel(x, y, closestColor);
 
                 int errorR = adjustedR - ((closestColor >> 16) & 0xff);
@@ -62,9 +62,9 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
                 currentError[x + 4][1] += 4 * errorG;
                 currentError[x + 4][2] += 4 * errorB;
 
-                nextError[x + 0][0] += 2 * errorR;
-                nextError[x + 0][1] += 2 * errorG;
-                nextError[x + 0][2] += 2 * errorB;
+                nextError[x][0] += 2 * errorR;
+                nextError[x][1] += 2 * errorG;
+                nextError[x][2] += 2 * errorB;
 
                 nextError[x + 1][0] += 4 * errorR;
                 nextError[x + 1][1] += 4 * errorG;
@@ -82,9 +82,9 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
                 nextError[x + 4][1] += 2 * errorG;
                 nextError[x + 4][2] += 2 * errorB;
 
-                nextNextError[x + 0][0] += 1 * errorR;
-                nextNextError[x + 0][1] += 1 * errorG;
-                nextNextError[x + 0][2] += 1 * errorB;
+                nextNextError[x][0] += errorR;
+                nextNextError[x][1] += errorG;
+                nextNextError[x][2] += errorB;
 
                 nextNextError[x + 1][0] += 2 * errorR;
                 nextNextError[x + 1][1] += 2 * errorG;
@@ -98,12 +98,11 @@ public class StuckiDitheringAlgorithm extends AbstractAlgorithm {
                 nextNextError[x + 3][1] += 2 * errorG;
                 nextNextError[x + 3][2] += 2 * errorB;
 
-                nextNextError[x + 4][0] += 1 * errorR;
-                nextNextError[x + 4][1] += 1 * errorG;
-                nextNextError[x + 4][2] += 1 * errorB;
+                nextNextError[x + 4][0] += errorR;
+                nextNextError[x + 4][1] += errorG;
+                nextNextError[x + 4][2] += errorB;
             }
 
-            // Сдвиг ошибок
             for (int i = 0; i < currentError.length; i++) {
                 currentError[i] = nextError[i];
                 nextError[i] = nextNextError[i];

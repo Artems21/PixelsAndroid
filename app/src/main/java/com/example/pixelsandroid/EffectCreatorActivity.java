@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -59,7 +60,7 @@ public class EffectCreatorActivity extends AppCompatActivity {
     private Spinner algorithmsSpinner;
     private CustomSpinnerAdapter adapter;
     private AbstractAlgorithm algorithm;
-private Slider valueSlider;
+    private Slider valueSlider;
 
     @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
@@ -124,28 +125,15 @@ private Slider valueSlider;
         };
 
 
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
-                this,
-                android.R.layout.simple_spinner_item,
-                algorithms
-        ) {
-            @Override
-            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                view.setPadding(16, 16, 16, 16);
-                return view;
-            }
-        };
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        algorithmsSpinner.setAdapter(adapter);
+        algorithmsSpinner.setAdapter(new BasedSpinnerAdapter(this, algorithms));
         algorithmsSpinner.setSelection(0);
         algorithmsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
-                       algorithm = new BayerDitheringAlgorithm(null, Color.valueOf(3, 3,3));
+                        algorithm = new BayerDitheringAlgorithm(null, Color.valueOf(3, 3, 3));
                         break;
                     case 1:
                         algorithm = new BayerPowerAlgorithm(null);
@@ -240,14 +228,17 @@ private Slider valueSlider;
                         .setTitle("Delete Color")
                         .setMessage("0x" + Integer.toHexString(mDefaultColor).toUpperCase())
                         .show();
-                updateImageView();
+                if (!colorsList.isEmpty())
+                    updateImageView();
 
             }
         });
 
         findViewById(R.id.save_effect_button).setOnClickListener(v -> {
-            int[] colors = colorsList.stream().mapToInt(Integer::intValue).toArray();
-            serializeEffect(editText.getText().toString(), colors, algorithmsSpinner.getSelectedItemPosition());
+            if (!editText.getText().toString().contains("Effect name") && !colorsList.isEmpty()) {
+                int[] colors = colorsList.stream().mapToInt(Integer::intValue).toArray();
+                serializeEffect(editText.getText().toString(), colors, algorithmsSpinner.getSelectedItemPosition());
+            }
         });
     }
 
@@ -256,7 +247,7 @@ private Slider valueSlider;
         super.onActivityResult(requestCode, resultCode, intent);
         if (intent != null && requestCode == 1) {
             changeImageSrc(intent);
-            drawNewImage();
+            updateImageView();
             //effectSlider.setValue(0.5f);*/
         }
     }
@@ -271,17 +262,13 @@ private Slider valueSlider;
     }
 
     private void updateImageView() {
-        if (imageData == null)
+        if (imageData == null || colorsList.isEmpty())
             return;
         Bitmap newBitmap;
         int[] colors = colorsList.stream().mapToInt(Integer::intValue).toArray();
         algorithm.updatePalette(colors);
         newBitmap = algorithm.process(imageData, valueSlider.getValue(), new int[]{256, 256});
         imageView.setImageBitmap(newBitmap);
-    }
-
-    private void drawNewImage() {
-        imageView.setImageBitmap(imageData);
     }
 
     private void updateSpinner(int[] colors) {
@@ -312,7 +299,8 @@ private Slider valueSlider;
 
     private void serializeEffect(String name, int[] palette, int algorithm) {
         Gson gson = new Gson();
-        Type listType = new TypeToken<ArrayList<EmptyEffect>>() {}.getType();
+        Type listType = new TypeToken<ArrayList<EmptyEffect>>() {
+        }.getType();
 
         ArrayList<EmptyEffect> effectsList = new ArrayList<>();
         try {

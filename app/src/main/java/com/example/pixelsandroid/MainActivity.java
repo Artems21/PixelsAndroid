@@ -272,7 +272,6 @@ public class MainActivity extends AppCompatActivity {
         System.arraycopy(customEffects, 0, combinedArray, basedEffects.length, customEffects.length);
 
 
-
         //Effect registration
         AbstractEffect.registerEffects(
                 combinedArray
@@ -289,14 +288,7 @@ public class MainActivity extends AppCompatActivity {
                 .map(AbstractEffect::name)
                 .toArray(String[]::new);
 
-        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
-                this,
-                android.R.layout.simple_spinner_item,
-                effectsNames
-        );
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        effectSpinner.setAdapter(adapter);
+        effectSpinner.setAdapter(new BasedSpinnerAdapter(this, effectsNames));
         effectSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -325,21 +317,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
 
-        ArrayAdapter<CharSequence> adapter2 = new ArrayAdapter<CharSequence>(
-                this,
-                android.R.layout.simple_spinner_item,
-                textSizes
-        ) {
-            @Override
-            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                view.setPadding(16, 16, 16, 16);
-                return view;
-            }
-        };
-
-        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        resolutionSpinner.setAdapter(adapter2);
+        resolutionSpinner.setAdapter(new BasedSpinnerAdapter(this, textSizes));
         resolutionSpinner.setSelection(4);
         resolutionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

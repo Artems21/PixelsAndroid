@@ -13,16 +13,16 @@ public class Cherry extends AbstractEffect {
     @Override
     public int[] palette() {
         return new int[]{
-                0x16171a,
-                0x7f0622,
-                0xd62411,
-                0xff8426,
-                0xffd100,
-                0xfafdff,
-                0xff80a4,
-                0xff2674,
-                0x94216a,
-                0x430067
+                0xFF16171a,
+                0xFF7f0622,
+                0xFFd62411,
+                0xFFff8426,
+                0xFFffd100,
+                0xFFfafdff,
+                0xFFff80a4,
+                0xFFff2674,
+                0xFF94216a,
+                0xFF430067
         };
     }
 

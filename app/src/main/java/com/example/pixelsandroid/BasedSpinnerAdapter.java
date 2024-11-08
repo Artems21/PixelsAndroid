@@ -13,11 +13,12 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
-public class CustomSpinnerAdapter extends ArrayAdapter<String> {
+public class BasedSpinnerAdapter extends ArrayAdapter<String> {
+
     private final LayoutInflater inflater;
 
-    public CustomSpinnerAdapter(@NonNull Context context, List<String> colors) {
-        super(context, R.layout.spinner_item, colors);
+    public BasedSpinnerAdapter(@NonNull Context context, String[] list) {
+        super(context, R.layout.spinner_item, list);
         inflater = LayoutInflater.from(context);
     }
 
@@ -27,7 +28,7 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
         @SuppressLint("ViewHolder") View view = inflater.inflate(R.layout.spinner_item, null, false);
         TextView textView = view.findViewById(R.id.nameTextView);
         textView.setText(getItem(position));
-        textView.setTextColor(Color.parseColor(getItem(position).replace("0xFF", "#")));
+        textView.setTextColor(Color.WHITE);
         return view;
     }
 
@@ -37,7 +38,7 @@ public class CustomSpinnerAdapter extends ArrayAdapter<String> {
         view.setBackgroundColor(Color.parseColor("#373636"));
         TextView textView = view.findViewById(R.id.nameTextView);
         textView.setText(getItem(position));
-        textView.setTextColor(Color.parseColor(getItem(position).replace("0xFF", "#")));
+        textView.setTextColor(Color.WHITE);
         return view;
     }
 }
